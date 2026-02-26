@@ -123,15 +123,20 @@ def show_text():
 <html><head><title>QR Code Content</title>
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <style>
-  body{{margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;
-    background:#0a0a0f;color:#e8e8f0;font-family:-apple-system,BlinkMacSystemFont,sans-serif;padding:24px;}}
+  body{{margin:0;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;
+    background:#0a0a0f;color:#e8e8f0;font-family:-apple-system,BlinkMacSystemFont,sans-serif;padding:24px;gap:24px;}}
+  .logo-link{{display:block;transition:transform 0.2s ease;}}
+  .logo-link:hover{{transform:scale(1.05);}}
+  .logo-link img{{height:60px;width:auto;filter:drop-shadow(0 2px 8px rgba(108,99,255,0.3));}}
   .card{{max-width:600px;width:100%;background:rgba(18,18,28,0.9);border:1px solid rgba(255,255,255,0.06);
     border-radius:16px;padding:32px;box-shadow:0 8px 32px rgba(0,0,0,0.5);}}
   .label{{font-size:0.75rem;text-transform:uppercase;letter-spacing:0.1em;color:#8888a0;margin-bottom:12px;}}
   .content{{font-size:1.1rem;line-height:1.7;word-break:break-word;}}
-  .footer{{margin-top:24px;font-size:0.7rem;color:#555568;text-align:center;}}
 </style>
 </head><body>
+<a href="https://www.proxpc.com" target="_blank" class="logo-link">
+  <img src="https://www.proxpc.com/img/logo.svg" alt="ProX PC">
+</a>
 <div class="card">
   <div class="label">QR Code Content</div>
   <div class="content">{safe_text}</div>
