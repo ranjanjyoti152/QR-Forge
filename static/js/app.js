@@ -358,5 +358,77 @@
 
     // ---- Initialize ----
     renderFields(activeType);
+    loadHistory();
+
+    // ---- History ----
+    const historySection = document.getElementById('historySection');
+    const historyGrid = document.getElementById('historyGrid');
+    const clearHistoryBtn = document.getElementById('clearHistoryBtn');
+
+    async function loadHistory() {
+        try {
+            const res = await fetch('/history');
+            const json = await res.json();
+            if (json.success && json.history && json.history.length > 0) {
+                historySection.style.display = 'block';
+                renderHistory(json.history);
+            } else {
+                historySection.style.display = 'none';
+            }
+        } catch (e) {
+            console.error('Failed to load history:', e);
+        }
+    }
+
+    function renderHistory(items) {
+        historyGrid.innerHTML = '';
+        items.forEach(item => {
+            const card = document.createElement('div');
+            card.className = 'history-card';
+            const isPng = item.filename && item.filename.endsWith('.png');
+            card.innerHTML = `
+                <div class="history-card-thumb">
+                    ${isPng ? `<img src="${item.file_url}" alt="QR" loading="lazy">` : `<span style="color:#888;font-size:0.75rem;">${item.output_format?.toUpperCase() || 'FILE'}</span>`}
+                </div>
+                <div class="history-card-label" title="${item.label || ''}">${item.label || 'QR Code'}</div>
+                <div class="history-card-meta">
+                    <span class="history-card-type">${item.qr_type || 'unknown'}</span>
+                    <span>${item.created_at || ''}</span>
+                </div>
+                <div class="history-card-actions">
+                    <a href="${item.download_url}" download title="Download">⬇ Download</a>
+                    <button onclick="deleteHistoryItem('${item.id}')" title="Delete">✕</button>
+                </div>
+            `;
+            historyGrid.appendChild(card);
+        });
+    }
+
+    // Expose delete function globally
+    window.deleteHistoryItem = async function (id) {
+        try {
+            await fetch(`/history/${id}`, { method: 'DELETE' });
+            loadHistory();
+        } catch (e) {
+            console.error('Delete failed:', e);
+        }
+    };
+
+    clearHistoryBtn.addEventListener('click', async () => {
+        if (!confirm('Clear all QR history?')) return;
+        try {
+            await fetch('/history', { method: 'DELETE' });
+            loadHistory();
+        } catch (e) {
+            console.error('Clear failed:', e);
+        }
+    });
+
+    // Reload history after generation
+    const origGenerate = generateQR;
+    generateQR = async function (format) {
+        await origGenerate.call(this, format);
+        loadHistory();
+    };
 
 })();

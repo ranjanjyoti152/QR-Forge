@@ -13,6 +13,9 @@ static/generated/*.png
 static/generated/*.svg
 static/generated/*.pdf
 
+# History data
+qr_history.json
+
 # Uploaded logos
 uploads/*
 !uploads/.gitkeep

@@ -2,6 +2,8 @@
 QR Code Generator — Flask Web Application
 """
 import os
+import json
+from datetime import datetime
 from flask import Flask, render_template, request, jsonify, send_from_directory
 from werkzeug.utils import secure_filename
 from urllib.parse import quote, unquote
@@ -12,6 +14,7 @@ app = Flask(__name__)
 app.config["MAX_CONTENT_LENGTH"] = 5 * 1024 * 1024  # 5 MB max upload
 app.config["UPLOAD_FOLDER"] = os.path.join(os.path.dirname(__file__), "uploads")
 app.config["OUTPUT_FOLDER"] = os.path.join(os.path.dirname(__file__), "static", "generated")
+HISTORY_FILE = os.path.join(os.path.dirname(__file__), "qr_history.json")
 
 ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg", "gif", "svg", "webp"}
 
@@ -21,6 +24,21 @@ os.makedirs(app.config["OUTPUT_FOLDER"], exist_ok=True)
 
 def allowed_file(filename: str) -> bool:
     return "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS
+
+
+def load_history():
+    if os.path.exists(HISTORY_FILE):
+        try:
+            with open(HISTORY_FILE, "r") as f:
+                return json.load(f)
+        except (json.JSONDecodeError, IOError):
+            return []
+    return []
+
+
+def save_history(history):
+    with open(HISTORY_FILE, "w") as f:
+        json.dump(history, f, indent=2)
 
 
 # --------------- Routes ---------------
@@ -86,6 +104,31 @@ def generate():
         file_url = f"/static/generated/{filename}"
         download_url = f"/download/{filename}"
 
+        # Save to history
+        original_type = payload.get("qr_type", "url")
+        original_data = payload.get("data", {})
+        # Remove internal keys from data
+        display_data = {k: v for k, v in original_data.items() if not k.startswith('_')}
+        
+        history_entry = {
+            "id": filename.replace("qr_", "").split(".")[0],
+            "qr_type": original_type,
+            "data": display_data,
+            "label": _make_label(original_type, display_data),
+            "filename": filename,
+            "file_url": file_url,
+            "download_url": download_url,
+            "fg_color": fg_color,
+            "bg_color": bg_color,
+            "module_style": module_style,
+            "output_format": output_format,
+            "created_at": datetime.now().strftime("%Y-%m-%d %H:%M"),
+        }
+        history = load_history()
+        history.insert(0, history_entry)
+        history = history[:50]  # Keep last 50
+        save_history(history)
+
         return jsonify({
             "success": True,
             "filename": filename,
@@ -96,6 +139,51 @@ def generate():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
+
+def _make_label(qr_type, data):
+    """Create a short label for the history entry."""
+    if qr_type == "url":
+        url = data.get("url", "")
+        return url[:50] + ("..." if len(url) > 50 else "")
+    elif qr_type == "text":
+        text = data.get("text", "")
+        return text[:50] + ("..." if len(text) > 50 else "")
+    elif qr_type == "wifi":
+        return f"WiFi: {data.get('ssid', '')}"
+    elif qr_type == "vcard":
+        return f"Contact: {data.get('fullName', '')}"
+    elif qr_type == "email":
+        return f"Email: {data.get('to', '')}"
+    elif qr_type == "sms":
+        return f"SMS: {data.get('phone', '')}"
+    elif qr_type == "phone":
+        return f"Phone: {data.get('phone', '')}"
+    elif qr_type == "event":
+        return f"Event: {data.get('title', '')}"
+    return qr_type
+
+
+@app.route("/history")
+def get_history():
+    """Return QR generation history."""
+    history = load_history()
+    return jsonify({"success": True, "history": history})
+
+
+@app.route("/history/<entry_id>", methods=["DELETE"])
+def delete_history(entry_id):
+    """Delete a single history entry."""
+    history = load_history()
+    history = [h for h in history if h.get("id") != entry_id]
+    save_history(history)
+    return jsonify({"success": True})
+
+
+@app.route("/history", methods=["DELETE"])
+def clear_history():
+    """Clear all history."""
+    save_history([])
+    return jsonify({"success": True})
 
 @app.route("/download/<filename>")
 def download(filename):

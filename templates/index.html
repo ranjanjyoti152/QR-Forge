@@ -11,7 +11,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap"
         rel="stylesheet">
-    <link rel="stylesheet" href="/static/css/style.css?v=2">
+    <link rel="stylesheet" href="/static/css/style.css?v=3">
 </head>
 
 <body>
@@ -288,6 +288,26 @@
 
     </main>
 
+    <!-- History Section -->
+    <section class="container history-section" id="historySection" style="display:none;">
+        <div class="panel">
+            <div class="history-header">
+                <h2 class="section-title" style="margin-bottom:0;">Recent QR Codes</h2>
+                <button class="clear-history-btn" id="clearHistoryBtn" title="Clear all history">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        style="width:14px;height:14px;">
+                        <polyline points="3 6 5 6 21 6" />
+                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                    </svg>
+                    Clear All
+                </button>
+            </div>
+            <div class="history-grid" id="historyGrid">
+                <!-- Populated by JS -->
+            </div>
+        </div>
+    </section>
+
     <!-- Footer -->
     <footer class="footer">
         <div class="container">
@@ -300,7 +320,7 @@
         <span id="toastMsg"></span>
     </div>
 
-    <script src="/static/js/app.js?v=2"></script>
+    <script src="/static/js/app.js?v=3"></script>
 </body>
 
 </html>
