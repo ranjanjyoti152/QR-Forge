@@ -211,8 +211,8 @@ def show_text():
 <html><head><title>QR Code Content</title>
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <style>
-  body{{margin:0;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;
-    background:#0a0a0f;color:#e8e8f0;font-family:-apple-system,BlinkMacSystemFont,sans-serif;padding:24px;gap:24px;}}
+  body{{margin:0;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;
+    background:#0a0a0f;color:#e8e8f0;font-family:-apple-system,BlinkMacSystemFont,sans-serif;padding:60px 24px 24px;gap:24px;}}
   .logo-link{{display:block;transition:transform 0.2s ease;}}
   .logo-link:hover{{transform:scale(1.05);}}
   .logo-link img{{height:60px;width:auto;filter:drop-shadow(0 2px 8px rgba(108,99,255,0.3));}}
