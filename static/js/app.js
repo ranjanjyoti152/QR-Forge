@@ -48,6 +48,8 @@
         ],
         text: [
             { key: "text", label: "Text Content", type: "textarea", placeholder: "Enter any text...", required: true },
+            { key: "_iosCompat", label: "", type: "checkbox", checkboxLabel: "Make iPhone compatible (wraps text as URL)" },
+            { key: "_iosNote", type: "note", message: "⚠️ iPhone Camera & Code Scanner cannot read plain text QR codes. Enable the option above to wrap your text as a URL that works everywhere." },
         ],
         wifi: [
             { key: "ssid", label: "Network Name (SSID)", type: "text", placeholder: "MyWiFi", required: true },
@@ -99,10 +101,16 @@
             const group = document.createElement("div");
             group.className = "form-group";
 
-            if (f.type === "checkbox") {
+            if (f.type === "note") {
+                group.innerHTML = `
+                    <div style="padding:10px 14px;background:rgba(234,179,8,0.08);border:1px solid rgba(234,179,8,0.2);border-radius:6px;font-size:0.78rem;color:#eab308;line-height:1.5;">
+                        ${f.message}
+                    </div>
+                `;
+            } else if (f.type === "checkbox") {
                 group.innerHTML = `
                     <label style="display:flex;align-items:center;gap:8px;cursor:pointer;">
-                        <input type="checkbox" id="field_${f.key}" data-key="${f.key}" style="accent-color:var(--accent);width:16px;height:16px;">
+                        <input type="checkbox" id="field_${f.key}" data-key="${f.key}" style="accent-color:var(--accent);width:16px;height:16px;" ${f.key === '_iosCompat' ? 'checked' : ''}>
                         <span style="font-size:0.85rem;color:var(--text-secondary);">${f.checkboxLabel}</span>
                     </label>
                 `;
