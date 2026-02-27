@@ -166,11 +166,21 @@ def generate_qr(
     if not content:
         raise ValueError("No content to encode")
 
-    # Ensure sufficient error correction when logo is used
+    # Optimization for small sticker printing:
+    # 1. Downgrade default 'M' error correction to 'L' when no logo is present to reduce grid density.
+    if not logo_path and error_correction == "M":
+        error_correction = "L"
+
+    # 2. Ensure sufficient error correction when logo IS used
     if logo_path and error_correction in ["L", "M"]:
         error_correction = "Q"
 
-    ec_level = ERROR_LEVELS.get(error_correction, qrcode.constants.ERROR_CORRECT_M)
+    ec_level = ERROR_LEVELS.get(error_correction, qrcode.constants.ERROR_CORRECT_L)
+    
+    # 3. Reduce the quiet zone (border) to 2 modules (standard is 4). This physically enlarges 
+    # the data modules when printed at a fixed sticker size.
+    border = min(border, 2)
+
     file_id = uuid.uuid4().hex[:12]
     os.makedirs(output_dir, exist_ok=True)
 
@@ -206,7 +216,8 @@ def generate_qr(
 
     # Overlay logo
     if logo_path and os.path.exists(logo_path):
-        img = _overlay_logo(img, logo_path)
+        logo_size_pct = float(data.get("_logoSize", 18)) / 100.0 if isinstance(data, dict) else 0.18
+        img = _overlay_logo(img, logo_path, logo_size_pct)
 
     # Save
     if output_format == "pdf":
@@ -342,12 +353,12 @@ def _generate_svg(content, ec_level, size, border, file_id, output_dir):
     return filename
 
 
-def _overlay_logo(qr_img: Image.Image, logo_path: str) -> Image.Image:
+def _overlay_logo(qr_img: Image.Image, logo_path: str, logo_size_pct: float = 0.18) -> Image.Image:
     """Overlay a logo at the center with white background."""
     logo = Image.open(logo_path).convert("RGBA")
 
     qr_w, qr_h = qr_img.size
-    max_logo_size = int(min(qr_w, qr_h) * 0.18)
+    max_logo_size = int(min(qr_w, qr_h) * logo_size_pct)
     logo.thumbnail((max_logo_size, max_logo_size), Image.LANCZOS)
     logo_w, logo_h = logo.size
 
