@@ -110,7 +110,7 @@
             } else if (f.type === "checkbox") {
                 group.innerHTML = `
                     <label style="display:flex;align-items:center;gap:8px;cursor:pointer;">
-                        <input type="checkbox" id="field_${f.key}" data-key="${f.key}" style="accent-color:var(--accent);width:16px;height:16px;" ${f.key === '_iosCompat' ? 'checked' : ''}>
+                        <input type="checkbox" id="field_${f.key}" data-key="${f.key}" style="accent-color:var(--accent);width:16px;height:16px;">
                         <span style="font-size:0.85rem;color:var(--text-secondary);">${f.checkboxLabel}</span>
                     </label>
                 `;

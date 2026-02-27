@@ -166,9 +166,9 @@ def generate_qr(
     if not content:
         raise ValueError("No content to encode")
 
-    # Force HIGH error correction when logo is used
-    if logo_path:
-        error_correction = "H"
+    # Ensure sufficient error correction when logo is used
+    if logo_path and error_correction in ["L", "M"]:
+        error_correction = "Q"
 
     ec_level = ERROR_LEVELS.get(error_correction, qrcode.constants.ERROR_CORRECT_M)
     file_id = uuid.uuid4().hex[:12]
